@@ -1,19 +1,21 @@
 const {logService, signService} = require('../services')
 const cryptoJs = require('crypto-js')
-
 const crypto = require('crypto')
+const jwt =  require('jsonwebtoken');
+// const { error } = require('console');
+const secret = 'your_secret_key_here';
 
 // const lol = ()=>{
 //     console.log(">>>>>>>>>> ", (crypto.randomBytes(8)))
 // }
 // lol()
 
-const loginController = async (req,res) => {
 
+const loginController = async (req,res) => {
     try{
         const {email,password} = req.body
 
-        if(! email || !password){
+        if(!email || !password){
             return res.send({
                 success : false,
                 message : "enter email or password",
@@ -43,12 +45,22 @@ const loginController = async (req,res) => {
                 // const salt = loginServiceOutput[0].salt;
                 // const hash = cryptoJs.SHA256(password + salt).toString();
                 // console.log(hash);
+                const { id, name } = loginServiceOutput;
+                const user = {
+                    id: id,
+                    name: name   
+                };
+                
+                const token = jwt.sign(user, secret, { expiresIn: "60s" });
+                res.cookie('token', token, { 
+                    maxAge: 60000, // Expires in 60 seconds (60,000 milliseconds)
+                    httpOnly: true // Ensures the cookie is not accessible via JavaScript
+                });
                 return res.send({
                         success: true,
                         message: "logged In!!",
                         loginServiceOutput,
-                    });
-                
+                });    
             }
         }
     }
@@ -109,7 +121,7 @@ const signupController = async (req,res) => {
             // const hashedPass = cryptoJs.SHA256(password + salt).toString()
             const signupData = {name,email,password};
             const signupSerivceOutput = await signService(signupData)
-
+            
             if(signupSerivceOutput === "error"){
                 return res.send({
                     success: false,
@@ -143,5 +155,43 @@ const signupController = async (req,res) => {
     }
 }
 
-module.exports = {loginController,signupController}
+const homeController = (req,res) => {
+    // console.log(">>>>>>>>>>>>>> ", req)
+    const myCookie = req.cookies.token;
+    console.log("my", myCookie);
+    jwt.verify(myCookie, secret, async (err, payload) => {
+        console.log("payload", payload);
+        if(!payload){
+            return res.send("user logged out");
+        }
+        else{
+            return res.send({
+                "id" : payload.id,
+                "name" : payload.name
+            }) 
+        }
+    })
+}
+
+// const jwt = require('jsonwebtoken'); // Import jwt module
+// const secret = 'your_secret_key_here'; // Define secret key
+
+// const homeController = (req, res) => {
+//     const myCookie = req.cookies.token;
+//     console.log("my", myCookie);
+//     jwt.verify(myCookie, secret, async (err, payload) => {
+//         console.log("payload", payload);
+//         if (!payload) {
+//             return res.send("user logged out");
+//         } else {
+//             return res.send({
+//                 "id": payload.id,
+//                 "name": payload.name
+//             });
+//         }
+//     });
+// };
+
+
+module.exports = {loginController,signupController,homeController}
 // module.exports = signupController

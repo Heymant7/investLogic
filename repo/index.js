@@ -43,4 +43,31 @@ const signupQuery = async (signData) => {
     })
 }
 
+// const getQuery = async (data) => {
+//     return new Promise((resolve,reject)=>{
+//         const {id} = data
+
+//         myDatabase.query(`SELECT * FROM userData WHERE email = ?`, [email], (error,result)=>{
+//             if(error){
+//                 console.log(error)
+//                 reject('error');
+//             }
+//             else if(result.length != 0){
+//                 resolve('exists!!')
+//             }
+//             else {
+//                 myDatabase.query(`INSERT INTO userData(name,email,password,salt) VALUES(?,?,?,?)`, 
+//                 [name,email,password,salt], (error,result)=>{
+//                     if(error){
+//                         reject('error');
+//                     }
+//                     else{
+//                         resolve(result)
+//                     }
+//                 })
+//             }
+//         })
+//     })
+// }
+
 module.exports = {loginQuery,signupQuery}
