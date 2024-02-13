@@ -4,12 +4,11 @@ const crypto = require('crypto')
 const jwt =  require('jsonwebtoken');
 // const { error } = require('console');
 const secret = 'your_secret_key_here';
-
-// const lol = ()=>{
-//     console.log(">>>>>>>>>> ", (crypto.randomBytes(8)))
-// }
-// lol()
-
+const fs = require('fs')
+const folder = "/home/heymant7/Desktop/loginPage/frontend/src/media/pdfs"
+const path = require('path')
+// const pdfPath = '/home/heymant7/Desktop/loginPage/frontend/public/pdfs/pdf1.pdf'
+const pdfPath = '/pdfs/pdf1.pdf'
 
 const loginController = async (req,res) => {
     try{
@@ -192,6 +191,47 @@ const homeController = (req,res) => {
 //     });
 // };
 
+const policyDocController = (req, res) => {
+      
+    try{
+      const policy = fs.readdirSync(folder)
+      const policyArray = []
+      let srNo = 0;
+      policy.map(item => {
+        if(item.includes('.pdf')){
+           srNo += 1;
+           const element = {
+             srNo : srNo,
+             file : item
+           } 
+           policyArray.push(element)
+        }
+      })
+      return res.send({
+          success : true,
+          message : "successfully get policyData",
+          policyArray
+      })
+    }catch(err){
+      console.log(err);
+      return res.send({
+        success : false,
+        message : "error in getting policyData"
+      })
+    }
+}
 
-module.exports = {loginController,signupController,homeController}
-// module.exports = signupController
+const getPolicyDataController = (req,res) => {
+    try{
+      res.send({
+          success : "true",
+          message : "path send",
+          pdfPath,
+      }) 
+    }catch(err){
+       console.log(err);
+    }
+}
+
+module.exports = {loginController,signupController,homeController,policyDocController,getPolicyDataController}
+
